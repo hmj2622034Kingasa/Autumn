@@ -3,7 +3,7 @@ using UnityEngine;
 public class CandyBullet : MonoBehaviour
 {
     [SerializeField]
-    private float moveSpeed = 10.0f;
+    private float speed = 10.0f;
 
     [SerializeField]
     private float damage = 10.0f;
@@ -13,34 +13,69 @@ public class CandyBullet : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    private Vector2 direction;
+    // Ç±ÇÃíeÇåÇÇ¡ÇΩêl
+    private Contestant owner;
+
+    void Awake()
+    {
+        rb =
+            GetComponent<Rigidbody2D>();
+    }
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-
-        rb.linearVelocity = direction * moveSpeed;
-
-        // âÊñ äOÇ»Ç«Ç…îÚÇÒÇ≈Ç¢Ç¡ÇΩíeÇé©ìÆçÌèú
-        Destroy(gameObject, lifeTime);
+        Destroy(
+            gameObject,
+            lifeTime
+        );
     }
 
-    public void SetDirection(Vector2 newDirection)
+    public void SetDirection(
+        Vector2 direction
+    )
     {
-        direction = newDirection.normalized;
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        EnemyHealth enemyHealth =
-            other.GetComponent<EnemyHealth>();
-
-        if (enemyHealth == null)
+        if (rb == null)
         {
             return;
         }
 
-        enemyHealth.TakeDamage(damage);
+        rb.linearVelocity =
+            direction.normalized *
+            speed;
+    }
+
+    public void SetDamage(
+        float newDamage
+    )
+    {
+        damage =
+            newDamage;
+    }
+
+    public void SetOwner(
+        Contestant newOwner
+    )
+    {
+        owner =
+            newOwner;
+    }
+
+    void OnTriggerEnter2D(
+        Collider2D other
+    )
+    {
+        EnemyHealth enemy =
+            other.GetComponent<EnemyHealth>();
+
+        if (enemy == null)
+        {
+            return;
+        }
+
+        enemy.TakeDamage(
+            damage,
+            owner
+        );
 
         Destroy(gameObject);
     }

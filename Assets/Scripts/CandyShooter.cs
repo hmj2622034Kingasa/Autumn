@@ -8,12 +8,29 @@ public class CandyShooter : MonoBehaviour
 
     [Header("Attack")]
     [SerializeField]
-    private float attackInterval = 0.6f;
-
-    [SerializeField]
     private float attackRange = 8.0f;
 
+    private float attackInterval = 0.6f;
+
     private float nextAttackTime = 0.0f;
+
+    private int weaponLevel = 1;
+
+    private PlayerLoadout loadout;
+
+    private Contestant contestant;
+    public int WeaponLevel
+    {
+        get { return weaponLevel; }
+    }
+
+    void Start()
+    {
+        loadout = 
+            GetComponent<PlayerLoadout>();
+        contestant = 
+            GetComponent<Contestant>();
+    }
 
     void Update()
     {
@@ -22,7 +39,8 @@ public class CandyShooter : MonoBehaviour
             return;
         }
 
-        EnemyHealth target = FindNearestEnemy();
+        EnemyHealth target =
+            FindNearestEnemy();
 
         if (target == null)
         {
@@ -31,16 +49,23 @@ public class CandyShooter : MonoBehaviour
 
         Shoot(target);
 
-        nextAttackTime = Time.time + attackInterval;
+        nextAttackTime =
+            Time.time +
+            attackInterval *
+            loadout.GetCooldownMultiplier();
     }
 
     EnemyHealth FindNearestEnemy()
     {
         EnemyHealth nearestEnemy = null;
 
-        float nearestDistance = attackRange;
+        float nearestDistance =
+            attackRange;
 
-        foreach (EnemyHealth enemy in EnemyHealth.AllEnemies)
+        foreach (
+            EnemyHealth enemy
+            in EnemyHealth.AllEnemies
+        )
         {
             if (enemy == null)
             {
@@ -53,9 +78,12 @@ public class CandyShooter : MonoBehaviour
                     enemy.transform.position
                 );
 
-            if (distance < nearestDistance)
+            if (distance <
+                nearestDistance)
             {
-                nearestDistance = distance;
+                nearestDistance =
+                    distance;
+
                 nearestEnemy = enemy;
             }
         }
@@ -67,7 +95,8 @@ public class CandyShooter : MonoBehaviour
     {
         Vector2 direction =
             ((Vector2)target.transform.position -
-             (Vector2)transform.position).normalized;
+             (Vector2)transform.position)
+            .normalized;
 
         GameObject bulletObject =
             Instantiate(
@@ -77,8 +106,52 @@ public class CandyShooter : MonoBehaviour
             );
 
         CandyBullet bullet =
-            bulletObject.GetComponent<CandyBullet>();
+            bulletObject
+            .GetComponent<CandyBullet>();
 
-        bullet.SetDirection(direction);
+        if (bullet != null)
+        {
+            bullet.SetDirection(
+                direction);
+
+            bullet.SetOwner(
+                contestant
+                );
+
+            if (loadout != null)
+            {
+                float finalDamage =
+                    10.0f *
+                    loadout.GetAttackMultiplier();
+
+                bullet.SetDamage(finalDamage);
+            } 
+
+           
+        }
+    }
+
+    public void LevelUpWeapon()
+    {
+        if (weaponLevel >= 3)
+        {
+            return;
+        }
+
+        weaponLevel++;
+
+        if (weaponLevel == 2)
+        {
+            attackInterval = 0.48f;
+        }
+        else if (weaponLevel == 3)
+        {
+            attackInterval = 0.38f;
+        }
+
+        Debug.Log(
+            "Candy Shooter Lv." +
+            weaponLevel
+        );
     }
 }

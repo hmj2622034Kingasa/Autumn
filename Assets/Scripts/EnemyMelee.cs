@@ -13,7 +13,6 @@ public class EnemyMelee : MonoBehaviour
     [SerializeField]
     private float attackInterval = 1.0f;
 
-    private Transform player;
     private Rigidbody2D rb;
 
     private float nextAttackTime = 0.0f;
@@ -21,46 +20,103 @@ public class EnemyMelee : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-
-        GameObject playerObject = GameObject.Find("Player");
-
-        if (playerObject != null)
-        {
-            player = playerObject.transform;
-        }
     }
 
     void FixedUpdate()
     {
-        if (player == null)
+        Contestant target =
+            FindNearestTarget();
+
+        if (target == null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.linearVelocity =
+                Vector2.zero;
+
             return;
         }
 
         Vector2 direction =
-            ((Vector2)player.position - rb.position).normalized;
+            (
+                target.transform.position -
+                transform.position
+            ).normalized;
 
-        rb.linearVelocity = direction * moveSpeed;
+        rb.linearVelocity =
+            direction * moveSpeed;
     }
 
-    void OnTriggerStay2D(Collider2D other)
+    Contestant FindNearestTarget()
     {
-        PlayerHealth playerHealth =
+        Contestant nearest = null;
+
+        float nearestDistance =
+            float.MaxValue;
+
+        foreach (
+            Contestant contestant
+            in Contestant.All
+        )
+        {
+            if (contestant == null)
+            {
+                continue;
+            }
+
+            PlayerHealth health =
+                contestant.GetComponent<PlayerHealth>();
+
+            if (health == null)
+            {
+                continue;
+            }
+
+            if (health.IsDown)
+            {
+                continue;
+            }
+
+            float distance =
+                Vector2.Distance(
+                    transform.position,
+                    contestant.transform.position
+                );
+
+            if (distance < nearestDistance)
+            {
+                nearestDistance =
+                    distance;
+
+                nearest = contestant;
+            }
+        }
+
+        return nearest;
+    }
+
+    void OnTriggerStay2D(
+        Collider2D other
+    )
+    {
+        PlayerHealth health =
             other.GetComponent<PlayerHealth>();
 
-        if (playerHealth == null)
+        if (health == null)
         {
             return;
         }
 
-        if (Time.time < nextAttackTime)
+        if (Time.time <
+            nextAttackTime)
         {
             return;
         }
 
-        playerHealth.TakeDamage(attackDamage);
+        health.TakeDamage(
+            attackDamage
+        );
 
-        nextAttackTime = Time.time + attackInterval;
+        nextAttackTime =
+            Time.time +
+            attackInterval;
     }
 }

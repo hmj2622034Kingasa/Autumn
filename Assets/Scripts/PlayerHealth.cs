@@ -18,6 +18,7 @@ public class PlayerHealth : MonoBehaviour
 
     private bool isDown = false;
     private bool isInvincible = false;
+    private bool isLevelUpInvincible = false;
 
     public float CurrentHP
     {
@@ -41,8 +42,9 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        // ダウン中または無敵中ならダメージを受けない
-        if (isDown || isInvincible)
+        if (isDown ||
+            isInvincible ||
+            isLevelUpInvincible)
         {
             return;
         }
@@ -54,11 +56,16 @@ public class PlayerHealth : MonoBehaviour
             currentHP = 0;
         }
 
-        Debug.Log("Player HP : " + currentHP);
+        Debug.Log(
+            "Player HP : " +
+            currentHP
+        );
 
         if (currentHP <= 0)
         {
-            StartCoroutine(DownRoutine());
+            StartCoroutine(
+                DownRoutine()
+            );
         }
     }
 
@@ -66,30 +73,80 @@ public class PlayerHealth : MonoBehaviour
     {
         isDown = true;
 
-        Debug.Log("Player Down!");
+        Debug.Log(
+            "Player Down!"
+        );
 
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        Rigidbody2D rb =
+            GetComponent<Rigidbody2D>();
 
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.linearVelocity =
+                Vector2.zero;
         }
 
-        // 3秒間ダウン
-        yield return new WaitForSeconds(respawnTime);
+        yield return
+            new WaitForSeconds(
+                respawnTime
+            );
 
-        // HP全回復
         currentHP = maxHP;
 
         isDown = false;
-
-        // 復活直後は少し無敵
         isInvincible = true;
 
-        Debug.Log("Player Respawn!");
+        Debug.Log(
+            "Player Respawn!"
+        );
 
-        yield return new WaitForSeconds(respawnInvincibleTime);
+        yield return
+            new WaitForSeconds(
+                respawnInvincibleTime
+            );
 
         isInvincible = false;
+    }
+
+    public void SetLevelUpInvincible(
+        bool value
+    )
+    {
+        isLevelUpInvincible = value;
+    }
+
+    public void IncreaseMaxHP(float amount)
+    {
+        maxHP += amount;
+
+        currentHP += amount;
+
+        Debug.Log(
+            "Max HP : " +
+            maxHP
+        );
+    }
+
+    // 吸血鬼のマントなどで使用
+    public void Heal(float amount)
+    {
+        if (isDown)
+        {
+            return;
+        }
+
+        currentHP += amount;
+
+        if (currentHP > maxHP)
+        {
+            currentHP = maxHP;
+        }
+
+        Debug.Log(
+            "Player Heal! HP : " +
+            currentHP +
+            " / " +
+            maxHP
+        );
     }
 }

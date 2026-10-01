@@ -9,38 +9,79 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
 
     private PlayerHealth playerHealth;
+    private LevelUpSystem levelUpSystem;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
 
-        playerHealth = GetComponent<PlayerHealth>();
+        playerHealth =
+            GetComponent<PlayerHealth>();
+
+        levelUpSystem =
+            GetComponent<LevelUpSystem>();
     }
 
     void Update()
     {
-        // ダウン中なら入力を受け付けない
-        if (playerHealth != null && playerHealth.IsDown)
+        // ダウン中
+        if (playerHealth != null &&
+            playerHealth.IsDown)
         {
             moveInput = Vector2.zero;
             return;
         }
 
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
+        // レベルアップ選択中
+        if (levelUpSystem != null &&
+            levelUpSystem.IsChoosing)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
 
-        moveInput = new Vector2(moveX, moveY).normalized;
+        float moveX =
+            Input.GetAxisRaw("Horizontal");
+
+        float moveY =
+            Input.GetAxisRaw("Vertical");
+
+        moveInput =
+            new Vector2(moveX, moveY).normalized;
     }
 
     void FixedUpdate()
     {
-        // ダウン中なら完全停止
-        if (playerHealth != null && playerHealth.IsDown)
+        if (playerHealth != null &&
+            playerHealth.IsDown)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.linearVelocity =
+                Vector2.zero;
             return;
         }
 
-        rb.linearVelocity = moveInput * moveSpeed;
+        if (levelUpSystem != null &&
+            levelUpSystem.IsChoosing)
+        {
+            rb.linearVelocity =
+                Vector2.zero;
+            return;
+        }
+
+        rb.linearVelocity =
+            moveInput * moveSpeed;
+    }
+
+    // 魔女のブーツ用
+    public void IncreaseMoveSpeed(
+        float percent
+    )
+    {
+        moveSpeed *=
+            1.0f + percent;
+
+        Debug.Log(
+            "Move Speed : " + moveSpeed
+        );
     }
 }
