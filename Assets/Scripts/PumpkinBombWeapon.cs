@@ -184,10 +184,10 @@ public class PumpkinBombWeapon : MonoBehaviour
                 return 2.0f;
 
             case 2:
-                return 1.8f;
+                return 1.5f;
 
             default:
-                return 1.6f;
+                return 1.0f;
         }
     }
 }

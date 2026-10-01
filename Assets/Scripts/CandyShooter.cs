@@ -142,11 +142,11 @@ public class CandyShooter : MonoBehaviour
 
         if (weaponLevel == 2)
         {
-            attackInterval = 0.48f;
+            attackInterval = 0.30f;
         }
         else if (weaponLevel == 3)
         {
-            attackInterval = 0.38f;
+            attackInterval = 0.10f;
         }
 
         Debug.Log(

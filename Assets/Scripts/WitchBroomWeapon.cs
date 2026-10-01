@@ -149,13 +149,13 @@ public class WitchBroomWeapon : MonoBehaviour
         switch (level)
         {
             case 1:
-                return 7.0f;
+                return 8.0f;
 
             case 2:
-                return 9.0f;
+                return 10.0f;
 
             default:
-                return 10.0f;
+                return 15.0f;
         }
     }
 

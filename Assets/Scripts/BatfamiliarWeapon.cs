@@ -157,13 +157,13 @@ public class BatFamiliarWeapon : MonoBehaviour
         switch (level)
         {
             case 1:
-                return 1;
-
-            case 2:
                 return 2;
 
+            case 2:
+                return 4;
+
             default:
-                return 3;
+                return 7;
         }
     }
 

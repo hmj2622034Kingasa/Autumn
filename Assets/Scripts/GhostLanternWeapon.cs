@@ -7,25 +7,56 @@ public class GhostLanternWeapon : MonoBehaviour
     [SerializeField]
     private GameObject ghostLanternPrefab;
 
+    // ƒ‰ƒ“ƒ^ƒ“‚ÌŒÂ”
+
+    [Header("Lantern Count")]
+    [SerializeField]
+    private int level1LanternCount = 3;
+
+    [SerializeField]
+    private int level2LanternCount = 5;
+
+    [SerializeField]
+    private int level3LanternCount = 9;
+
+    // ‰ñ“]
+
     [Header("Movement")]
     [SerializeField]
     private float orbitRadius = 1.5f;
 
     [SerializeField]
-    private float normalRotationSpeed = 120.0f;
+    private float level1RotationSpeed = 120.0f;
 
     [SerializeField]
-    private float level3RotationSpeed = 180.0f;
+    private float level2RotationSpeed = 150.0f;
+
+    [SerializeField]
+    private float level3RotationSpeed = 210.0f;
+
+    // UŒ‚
 
     [Header("Attack")]
     [SerializeField]
     private float hitRadius = 0.45f;
 
     [SerializeField]
-    private float damage = 10.0f;
+    private float level1Damage = 10.0f;
 
     [SerializeField]
-    private float damageInterval = 0.5f;
+    private float level2Damage = 13.0f;
+
+    [SerializeField]
+    private float level3Damage = 16.0f;
+
+    [SerializeField]
+    private float level1DamageInterval = 0.5f;
+
+    [SerializeField]
+    private float level2DamageInterval = 0.45f;
+
+    [SerializeField]
+    private float level3DamageInterval = 0.4f;
 
     private PlayerLoadout loadout;
 
@@ -67,7 +98,7 @@ public class GhostLanternWeapon : MonoBehaviour
         }
 
         // ƒŒƒxƒ‹‚ª•Ï‚í‚Á‚½‚ç
-        // ƒ‰ƒ“ƒ^ƒ“‚Ì”‚ğì‚è’¼‚·
+        // ƒ‰ƒ“ƒ^ƒ“‚ğì‚è’¼‚·
         if (level != lastLevel)
         {
             CreateLanterns(level);
@@ -79,20 +110,28 @@ public class GhostLanternWeapon : MonoBehaviour
 
         if (Time.time >= nextDamageTime)
         {
-            AttackEnemies();
+            AttackEnemies(level);
+
+            float interval =
+                GetDamageInterval(level);
+
+            // Œ–é‚ÌŒv‚ÌŒø‰Ê
+            interval *=
+                loadout.GetCooldownMultiplier();
 
             nextDamageTime =
-                Time.time +
-                damageInterval *
-                loadout.GetCooldownMultiplier();
+                Time.time + interval;
         }
     }
+
+    // ƒ‰ƒ“ƒ^ƒ“¶¬
 
     void CreateLanterns(int level)
     {
         RemoveAllLanterns();
 
-        int lanternCount = level;
+        int lanternCount =
+            GetLanternCount(level);
 
         for (
             int i = 0;
@@ -111,6 +150,8 @@ public class GhostLanternWeapon : MonoBehaviour
         }
     }
 
+    // ƒ‰ƒ“ƒ^ƒ“ˆÚ“®
+
     void MoveLanterns(int level)
     {
         if (lanterns.Count == 0)
@@ -119,15 +160,15 @@ public class GhostLanternWeapon : MonoBehaviour
         }
 
         float rotationSpeed =
-            level >= 3
-            ? level3RotationSpeed
-            : normalRotationSpeed;
+            GetRotationSpeed(level);
 
         currentAngle +=
-            rotationSpeed * Time.deltaTime;
+            rotationSpeed *
+            Time.deltaTime;
 
         float angleDistance =
-            360.0f / lanterns.Count;
+            360.0f /
+            lanterns.Count;
 
         for (
             int i = 0;
@@ -140,24 +181,33 @@ public class GhostLanternWeapon : MonoBehaviour
                 angleDistance * i;
 
             float radian =
-                angle * Mathf.Deg2Rad;
+                angle *
+                Mathf.Deg2Rad;
 
             Vector2 offset =
                 new Vector2(
                     Mathf.Cos(radian),
                     Mathf.Sin(radian)
-                ) * orbitRadius;
+                ) *
+                orbitRadius;
 
-            lanterns[i].transform.position =
+            lanterns[i]
+                .transform.position =
                 (Vector2)transform.position +
                 offset;
         }
     }
 
-    void AttackEnemies()
+    // UŒ‚
+
+    void AttackEnemies(int level)
     {
+        float baseDamage =
+            GetDamage(level);
+
+        // •”L‚Ì‚¨ç‚è‚ÌŒø‰Ê
         float finalDamage =
-            damage *
+            baseDamage *
             loadout.GetAttackMultiplier();
 
         foreach (
@@ -170,10 +220,9 @@ public class GhostLanternWeapon : MonoBehaviour
                 continue;
             }
 
-            // ToArray‚ğg‚Á‚ÄA
-            // UŒ‚’†‚É“G‚ªÁ‚¦‚Ä‚àˆÀ‘S‚É‚·‚é
             EnemyHealth[] enemies =
-                EnemyHealth.AllEnemies.ToArray();
+                EnemyHealth.AllEnemies
+                    .ToArray();
 
             foreach (
                 EnemyHealth enemy
@@ -193,11 +242,83 @@ public class GhostLanternWeapon : MonoBehaviour
 
                 if (distance <= hitRadius)
                 {
-                    enemy.TakeDamage(finalDamage);
+                    enemy.TakeDamage(
+                        finalDamage
+                    );
                 }
             }
         }
     }
+
+    // Lv‚²‚Æ‚ÌŒÂ”
+
+    int GetLanternCount(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return level1LanternCount;
+
+            case 2:
+                return level2LanternCount;
+
+            default:
+                return level3LanternCount;
+        }
+    }
+
+    // Lv‚²‚Æ‚Ì‰ñ“]‘¬“x
+
+    float GetRotationSpeed(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return level1RotationSpeed;
+
+            case 2:
+                return level2RotationSpeed;
+
+            default:
+                return level3RotationSpeed;
+        }
+    }
+
+    // Lv‚²‚Æ‚Ìƒ_ƒ[ƒW
+
+    float GetDamage(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return level1Damage;
+
+            case 2:
+                return level2Damage;
+
+            default:
+                return level3Damage;
+        }
+    }
+
+    // Lv‚²‚Æ‚ÌUŒ‚ŠÔŠu
+
+    float GetDamageInterval(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return level1DamageInterval;
+
+            case 2:
+                return level2DamageInterval;
+
+            default:
+                return level3DamageInterval;
+        }
+    }
+
+    // ‘Síœ
 
     void RemoveAllLanterns()
     {
